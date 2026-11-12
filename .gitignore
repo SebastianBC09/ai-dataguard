@@ -3,3 +3,19 @@
 .env.*
 !.env.example
 node_modules/
+
+# macOS: archivos temporales y metadatos del sistema
+._*
+.AppleDouble
+.LSOverride
+.Spotlight-V100
+.Trashes
+.fseventsd
+.TemporaryItems
+.DocumentRevisions-V100
+
+# Office: archivos temporales, bloqueos y autoguardado
+~$*
+*.tmp
+*.asd
+.~lock.*#
