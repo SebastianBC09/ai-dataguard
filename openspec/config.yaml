@@ -12,13 +12,14 @@ context: |
 
   Usuarios:
     - Trabajadores de organizaciones colombianas.
-    - Administradores y responsables de cumplimiento.
+    - Administradores, con la función de responsable de cumplimiento.
     - Enfoque inicial en pequeñas y medianas empresas.
 
   Capacidades del MVP:
     - Análisis de documentos y textos.
     - Clasificación de información sensible.
-    - Evaluación de reglas jurídicas y políticas corporativas.
+    - Evaluación de reglas jurídicas, políticas corporativas y
+      controles funcionales transversales.
     - Consulta de condiciones de proveedores de IA.
     - Generación de informes y trazabilidad.
 
@@ -38,6 +39,8 @@ context: |
     La ficha E1 estará en docs/project/project-charter.md.
     La matriz E2 estará en docs/legal/legal-matrix.md.
     El plan de pruebas estará en docs/testing/test-plan.md.
+    Estas rutas son oficiales; su equivalencia con los nombres del Excel
+    del docente está en openspec/changes/initial-mvp/design.md.
 
 rules:
   proposal:

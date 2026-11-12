@@ -2,109 +2,154 @@
 
 ## Purpose
 
-Identifica indicadores de sensibilidad en el contenido analizado y le asigna un nivel de clasificación explicable. Las categorías y niveles son **provisionales** (O-02) y su equivalencia jurídica queda pendiente de E2; no constituyen una calificación legal.
+Identifica indicadores de sensibilidad en el contenido y le asigna una clasificación de sensibilidad (Pública, Interna, Confidencial o Restringida) o la registra como pendiente de revisión. La clasificación describe el contenido; el resultado de riesgo, definido en `compliance-policies`, describe su uso con un proveedor, políticas y reglas. Categorías, marcas y criterios son **provisionales** (O-02) y no constituyen una calificación legal.
 
 ## ADDED Requirements
 
-### Requirement: Categorías funcionales de indicadores
-El sistema SHALL reconocer como mínimo estas categorías: datos personales de identificación y contacto, datos personales financieros, indicadores de sensibilidad alta, información corporativa confidencial, y credenciales o secretos técnicos. La equivalencia jurídica de cada categoría está pendiente de E2.
+### Requirement: CLA-01 Categorías funcionales de indicadores
+[MVP esencial] El sistema SHALL reconocer estas categorías: datos personales de identificación y contacto; datos personales financieros; sensibilidad alta (origen racial o étnico, orientación política, convicciones religiosas o filosóficas, pertenencia a sindicatos, organizaciones sociales o de derechos humanos, salud, vida sexual, biométricos); indicios textuales de datos de menores; información corporativa confidencial con marcas explícitas; y credenciales o secretos técnicos.
 
 #### Scenario: Contenido con cada categoría
-- **WHEN** se analiza contenido sintético que incluye un indicador de cada categoría
-- **THEN** el sistema genera un hallazgo asociado a cada una (CP-01, CP-03)
+- **WHEN** se evalúa contenido sintético con un indicador de cada categoría
+- **THEN** el sistema genera un hallazgo asociado a cada una (CP-01)
 
-#### Scenario: Indicador fuera de las categorías soportadas
+#### Scenario: Indicios de datos de menores
+- **WHEN** el texto menciona expresamente a un niño, niña, adolescente o menor de edad junto con datos personales sintéticos
+- **THEN** el sistema genera un hallazgo de la categoría de indicios de datos de menores, sin verificar la edad ni la autorización (CP-01)
+
+#### Scenario: Dato sensible de la lista ampliada
+- **WHEN** el texto incluye una afiliación sindical ficticia
+- **THEN** el sistema genera un hallazgo de sensibilidad alta (CP-01)
+
+#### Scenario: Información corporativa sin marca explícita
+- **WHEN** el contenido describe información corporativa sin ninguna marca explícita
+- **THEN** el sistema no genera hallazgo corporativo y el informe declara que esa detección se limita a marcas explícitas (CP-02)
+
+#### Scenario: Indicador fuera de las categorías
 - **WHEN** el contenido incluye información sensible de un tipo no contemplado
-- **THEN** el sistema no genera hallazgo y mantiene la advertencia de que la ausencia de alertas no es autorización
+- **THEN** el sistema no genera hallazgo y la clasificación queda pendiente de revisión si no hay otros indicadores (CP-02)
 
-### Requirement: Marcas explícitas de confidencialidad
-El sistema SHALL tratar como indicador las marcas explícitas de confidencialidad que aparezcan en el contenido, sin distinguir mayúsculas de minúsculas.
+### Requirement: CLA-02 Marcas explícitas de confidencialidad
+[MVP esencial] El sistema SHALL reconocer las expresiones completas «uso interno», «confidencial», «reservado» y «restringido», sin distinguir mayúsculas, con esta correspondencia: «uso interno» da Interna; «confidencial» da Confidencial; «reservado» y «restringido» dan Restringida. La lista es provisional.
 
-#### Scenario: Marca en mayúsculas
-- **WHEN** el contenido incluye la marca "CONFIDENCIAL"
-- **THEN** el sistema genera un hallazgo de información corporativa confidencial
+#### Scenario: Marca en mayúsculas y en minúsculas
+- **WHEN** el contenido incluye «CONFIDENCIAL» en un caso y «confidencial» en otro
+- **THEN** ambos generan el mismo hallazgo de nivel Confidencial
 
-#### Scenario: Marca en minúsculas
-- **WHEN** el contenido incluye la misma marca en minúsculas
-- **THEN** el sistema genera el mismo hallazgo
+#### Scenario: Marca de uso interno
+- **WHEN** el contenido incluye «USO INTERNO» y ningún otro indicador
+- **THEN** el sistema genera un hallazgo de nivel Interna
 
-### Requirement: Niveles de clasificación provisionales
-El sistema SHALL asignar a cada evaluación uno de estos niveles, ordenados de menor a mayor: "Sin indicadores detectados", "Interno", "Confidencial" y "Restringido". Los nombres son provisionales (O-02).
+#### Scenario: Palabra aislada
+- **WHEN** el contenido incluye la palabra «interno» dentro de otra expresión, como «control interno»
+- **THEN** el sistema no la reconoce como marca
 
-#### Scenario: Sin hallazgos
-- **WHEN** la evaluación no tiene hallazgos y no es parcial
-- **THEN** el nivel asignado es "Sin indicadores detectados" (CP-02)
+#### Scenario: Marcas en conflicto
+- **WHEN** el contenido incluye «confidencial» y «reservado»
+- **THEN** el hallazgo determinante es el de mayor nivel, Restringida (CP-03)
+
+### Requirement: CLA-03 Niveles de clasificación y estado
+[MVP esencial] El sistema SHALL registrar una clasificación con uno de los niveles ordenados Pública < Interna < Confidencial < Restringida, o con el estado «pendiente de revisión» (con nivel sugerido cuando exista). El nivel es el más alto entre sus hallazgos. Un «hallazgo relevante» es el de una categoría que corresponde a Confidencial o Restringida.
 
 #### Scenario: Hallazgos de distinto nivel
-- **WHEN** la evaluación tiene hallazgos que corresponden a distintos niveles
-- **THEN** el nivel asignado es el más alto de ellos
+- **WHEN** la evaluación tiene hallazgos de niveles distintos
+- **THEN** el nivel asignado es el más alto (CP-01)
 
-### Requirement: Regla provisional de asignación de nivel
-El sistema SHALL asignar al menos el nivel "Confidencial" ante datos personales de identificación, contacto o financieros, o información corporativa confidencial, y el nivel "Restringido" ante indicadores de sensibilidad alta o credenciales.
+#### Scenario: Clasificación pendiente con nivel sugerido
+- **WHEN** la clasificación queda pendiente de revisión y existen hallazgos
+- **THEN** el sistema muestra «pendiente de revisión» y el nivel sugerido más alto (CP-08)
+
+#### Scenario: Clasificación pendiente sin hallazgos
+- **WHEN** la clasificación queda pendiente y no hay hallazgos
+- **THEN** el sistema muestra «pendiente de revisión» sin nivel sugerido (CP-02)
+
+### Requirement: CLA-04 Criterios de asignación automática
+[MVP esencial] El sistema SHALL asignar automáticamente: Restringida ante sensibilidad alta, credenciales o marcas «reservado» o «restringido»; Confidencial ante datos personales de identificación, contacto o financieros, indicios de datos de menores o marca «confidencial»; Interna solo ante marca «uso interno» sin hallazgos de nivel superior.
 
 #### Scenario: Datos de contacto
-- **WHEN** el contenido incluye datos personales de contacto sintéticos
-- **THEN** el nivel asignado es al menos "Confidencial" (CP-01)
+- **WHEN** el contenido incluye un correo sintético con certeza media o alta
+- **THEN** el nivel asignado es Confidencial (CP-01)
 
 #### Scenario: Credencial sintética
 - **WHEN** el contenido incluye una credencial sintética
-- **THEN** el nivel asignado es "Restringido"
+- **THEN** el nivel asignado es Restringida (CP-01)
 
-#### Scenario: Información corporativa confidencial
-- **WHEN** el contenido incluye información corporativa confidencial sintética
-- **THEN** el nivel asignado es al menos "Confidencial" (CP-03)
+#### Scenario: Indicios de datos de menores
+- **WHEN** el contenido incluye indicios de datos de menores y ningún indicador de nivel superior
+- **THEN** el nivel asignado es al menos Confidencial (CP-01)
 
-### Requirement: Explicación de la clasificación
-El sistema SHALL presentar el nivel asignado junto con los hallazgos que lo determinan y el motivo de cada uno.
+#### Scenario: Marca reservado
+- **WHEN** el contenido incluye la marca «reservado»
+- **THEN** el nivel asignado es Restringida (CP-03)
 
-#### Scenario: Nivel Restringido
-- **WHEN** el nivel asignado es "Restringido"
-- **THEN** el resultado muestra el hallazgo determinante y su motivo
+#### Scenario: Uso interno con un dato de nivel superior
+- **WHEN** el contenido incluye «uso interno» y un correo sintético
+- **THEN** el nivel asignado es Confidencial y no Interna (CP-03)
 
-#### Scenario: Consulta del porqué
-- **WHEN** el usuario consulta por qué se asignó un nivel
-- **THEN** el sistema lista los hallazgos y el criterio aplicado
+### Requirement: CLA-05 Clasificación pendiente por información insuficiente (control CT-05)
+[MVP esencial] El sistema SHALL registrar la clasificación como «pendiente de revisión» y SHALL NOT asignar «Pública» cuando no haya hallazgos ni marcas, el análisis sea parcial, algún hallazgo tenga certeza baja o los hallazgos se contradigan.
 
-### Requirement: Certeza baja exige revisión humana
-El sistema SHALL marcar la evaluación como "requiere revisión humana" cuando exista un hallazgo de certeza baja o hallazgos en conflicto, y no SHALL reducir el nivel por esa incertidumbre.
+#### Scenario: Sin hallazgos ni marcas
+- **WHEN** el contenido no tiene hallazgos ni marcas
+- **THEN** la clasificación es «pendiente de revisión» y no Pública (CP-02)
+
+#### Scenario: Texto que se declara público
+- **WHEN** el contenido incluye la frase «documento público» y ningún otro indicador
+- **THEN** la clasificación sigue pendiente de revisión
 
 #### Scenario: Hallazgo de certeza baja
 - **WHEN** un hallazgo tiene certeza baja
-- **THEN** la evaluación se marca "requiere revisión humana" y el nivel considera la categoría como si se confirmara (CP-07)
+- **THEN** la clasificación es «pendiente de revisión» con nivel sugerido (CP-08)
 
-#### Scenario: Hallazgos en conflicto
-- **WHEN** dos hallazgos sugieren niveles distintos para el mismo fragmento
-- **THEN** el sistema asigna el nivel más alto y exige revisión humana
+#### Scenario: Hallazgos en contradicción
+- **WHEN** dos hallazgos sugieren tipos distintos para el mismo fragmento
+- **THEN** la clasificación es «pendiente de revisión» con el nivel sugerido más alto
 
-#### Scenario: Único hallazgo de certeza baja
-- **WHEN** el único hallazgo tiene certeza baja
-- **THEN** el sistema no asigna "Sin indicadores detectados"
+### Requirement: CLA-06 Resolución humana de la clasificación
+[MVP esencial] El sistema SHALL permitir que un Revisor (el Administrador en su función de revisión de cumplimiento) asigne o ajuste el nivel solo con una justificación. «Pública» SHALL asignarse únicamente así. Se conservan el nivel automático o sugerido y el humano.
 
-### Requirement: Ajuste humano del nivel con justificación
-El sistema SHALL permitir que un Revisor (Administrador o Responsable de cumplimiento, ver O-01) ajuste el nivel asignado solo con una justificación, conservando el nivel original y el ajustado.
-
-#### Scenario: Ajuste justificado
-- **WHEN** un Revisor ajusta el nivel e ingresa una justificación
-- **THEN** el sistema registra ambos niveles, la justificación, la persona y la fecha
+#### Scenario: Asignar Pública con justificación
+- **WHEN** un Revisor asigna Pública a una clasificación pendiente e ingresa justificación
+- **THEN** el sistema registra ambos niveles, la justificación, la persona y la fecha (CP-08)
 
 #### Scenario: Ajuste sin justificación
-- **WHEN** un Revisor intenta ajustar el nivel sin justificación
-- **THEN** el sistema rechaza el ajuste
+- **WHEN** un Revisor intenta asignar o ajustar el nivel sin justificación
+- **THEN** el sistema rechaza el cambio
 
 #### Scenario: Ajuste por un Trabajador
-- **WHEN** un usuario con perfil Trabajador intenta ajustar el nivel
-- **THEN** el sistema deniega la acción (CP-09)
+- **WHEN** un usuario con perfil Trabajador intenta asignar o ajustar el nivel
+- **THEN** el sistema deniega la acción (CP-11)
 
-### Requirement: Sin indicadores no equivale a información pública o segura
-El sistema SHALL NOT presentar el nivel "Sin indicadores detectados" con términos como "público", "seguro", "aprobado" o "autorizado".
+#### Scenario: Reducción del nivel automático
+- **WHEN** un Revisor baja una clasificación de Confidencial a Interna con justificación
+- **THEN** el sistema acepta el cambio, conserva el nivel automático y lo registra en el historial (CP-08)
 
-#### Scenario: Resultado sin indicadores
-- **WHEN** el nivel asignado es "Sin indicadores detectados"
-- **THEN** el resultado no usa esos términos y muestra la advertencia de ausencia de alertas (CP-02)
+### Requirement: CLA-07 Explicación de la clasificación
+[MVP esencial] El sistema SHALL presentar la clasificación junto con los hallazgos y marcas que la determinan y el motivo de cada uno.
 
-### Requirement: Consistencia de la clasificación
-El sistema SHALL asignar el mismo nivel ante los mismos hallazgos y la misma versión de reglas de clasificación.
+#### Scenario: Nivel Restringida
+- **WHEN** el nivel asignado es Restringida
+- **THEN** el resultado muestra el hallazgo o la marca determinante y su motivo (CP-03)
 
-#### Scenario: Mismos hallazgos
-- **WHEN** dos evaluaciones tienen los mismos hallazgos y la misma versión de reglas
-- **THEN** ambas reciben el mismo nivel
+#### Scenario: Clasificación pendiente
+- **WHEN** la clasificación está pendiente de revisión
+- **THEN** el resultado indica cuál de los motivos de CLA-05 la originó (CP-08)
+
+#### Scenario: Pendiente sin hallazgos
+- **WHEN** la clasificación está pendiente porque no hay hallazgos ni marcas
+- **THEN** el resultado indica ese motivo y no inventa hallazgos determinantes (CP-02)
+
+### Requirement: CLA-08 Clasificación independiente del resultado de riesgo
+[MVP esencial] El sistema SHALL calcular la clasificación solo a partir del contenido, y cambiar el proveedor, las políticas o las reglas SHALL NOT modificarla. La clasificación y el resultado de riesgo SHALL mostrarse como campos separados.
+
+#### Scenario: Mismo contenido con dos proveedores
+- **WHEN** el mismo contenido se evalúa con dos proveedores de condiciones distintas
+- **THEN** la clasificación es la misma y el resultado de riesgo puede diferir (CP-01, CP-07)
+
+#### Scenario: Activación de una política
+- **WHEN** un Administrador activa una política y se vuelve a someter el mismo contenido
+- **THEN** la clasificación no cambia aunque cambie el resultado de riesgo (CP-05)
+
+#### Scenario: Presentación separada
+- **WHEN** se muestra el resultado de una evaluación
+- **THEN** la clasificación de sensibilidad y el resultado de riesgo aparecen como campos distintos (CP-12)
