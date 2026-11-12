@@ -1,0 +1,63 @@
+schema: spec-driven
+
+context: |
+  Proyecto: AI DataGuard
+  Tipo: Proyecto integrador universitario de Contexto Legal de la Ingeniería.
+  Idioma: Español para todos los artefactos y especificaciones.
+
+  Propósito:
+    Prevenir la divulgación no autorizada de datos personales
+    e información corporativa confidencial mediante herramientas
+    de inteligencia artificial generativa.
+
+  Usuarios:
+    - Trabajadores de organizaciones colombianas.
+    - Administradores y responsables de cumplimiento.
+    - Enfoque inicial en pequeñas y medianas empresas.
+
+  Capacidades del MVP:
+    - Análisis de documentos y textos.
+    - Clasificación de información sensible.
+    - Evaluación de reglas jurídicas y políticas corporativas.
+    - Consulta de condiciones de proveedores de IA.
+    - Generación de informes y trazabilidad.
+
+  Restricciones:
+    - No seleccionar todavía un stack tecnológico.
+    - No implementar código durante la fase actual.
+    - No transmitir documentos sensibles a proveedores externos
+      para evaluar su confidencialidad.
+    - No presentar resultados como certificaciones jurídicas.
+    - Mantener revisión humana y explicabilidad.
+    - Documentar cinco reglas jurídicas y diez casos de prueba.
+    - Preparar tres escenarios de demostración.
+    - E1 y E2 permanecen pendientes de aprobación docente.
+
+  Documentación:
+    Los documentos académicos se encuentran en docs/academic/.
+    La ficha E1 estará en docs/project/project-charter.md.
+    La matriz E2 estará en docs/legal/legal-matrix.md.
+    El plan de pruebas estará en docs/testing/test-plan.md.
+
+rules:
+  proposal:
+    - Definir problema, objetivos, alcance y exclusiones.
+    - Alinear la propuesta con el proyecto integrador.
+    - Identificar las decisiones pendientes de aprobación docente.
+
+  specs:
+    - Utilizar requisitos verificables con SHALL.
+    - Documentar escenarios mediante WHEN y THEN.
+    - Incluir escenarios positivos, negativos y casos límite.
+    - Mantener trazabilidad con las reglas jurídicas.
+
+  design:
+    - Describir el diseño conceptual sin imponer tecnologías.
+    - Documentar privacidad, seguridad y revisión humana.
+    - Distinguir decisiones aprobadas de propuestas.
+
+  tasks:
+    - Organizar tareas con resultados verificables.
+    - Incluir responsables y dependencias pendientes de asignación.
+    - No marcar tareas futuras como completadas.
+    - Mantener coherencia con el Excel del plan de trabajo.
